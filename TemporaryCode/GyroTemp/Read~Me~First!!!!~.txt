@@ -1,0 +1,61 @@
+July 26 2015 Update....New Toxiclibs updated/Readme Updated
+
+Hey guys This is Aj Odin!
+I packed the library files into this zip. If they do NOT work please 
+download them directly from these links: 
+
+http://hg.postspectacular.com/toxiclibs/downloads/
+https://github.com/jrowberg/i2cdevlib 
+
+THESE ARE NOT MY LIBRARIES I JUST PACKED THEM INTO ONE CONVENIENT ZIP FOR YOU
+
+CREDIT TO JEFF ROWBERG I2C DEV THANKS TO HIM FOR CODES AND SKETCH !
+CREDIT TO JEFF ROWBERG TEAPOT DEMO THANKS JEFF FOR HELPING US OUT !
+
+
+NEW USER LIBRARY INSTALL: 
+PLEASE READ : 
+https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library
+https://processing.org/reference/libraries/
+
+READ THESE GUIDES FIRST ^^^^^^^^^^
+
+
+Quick Guide (for experienced users)
+1) Move each zip into corressponding arduino/processing folder.
+2) ( i2C DevLibMaster.zip HAS MANY SUBCATEGORIES!! !~FIND MPU 6050 FOLDER~!
+!~FIND MPU 6050 FOLDER~! COPY THIS FOLDER TO ARDUINO/Libraries)
+3) ( postspectacular-toxiclibs-44d9932dbc9f (1).zip 
+goes to processing2.2.1/sketchbook/libraries/toxiclibs)
+3.5) IF YOU DO NOT HAVE THIS FOLDER. OPEN PROCESSING, GO
+TO PREFERENCES, CHANGE THE DEFAULT FOLDER TO 'processing2.2.1'
+THEN PRESS OK. THIS WILL CREATE 'sketchbook' INSIDE THE PROCESSING ROOT
+FOLDER. NOW GO HERE AND CREATE A FOLDER CALLED 'libraries'
+4) You should now go see these subfolders in the Arduino & Processing
+drop down menu! (& File/Example MPU6050 Will Be there)
+
+Thanks to @PlyAlex (Youtube Channel) for providing the working links above!
+I could not find them until Alex provided for us !
+
+QUICK PIN OUTPUT REFERENCE GUIDE
+
+MPU 6050 PIN OutPut
+
+SCL – A5
+SDA – A4
+VCC – 3.3V
+GND – GND
+ADO – GND 
+INT – PIN2 
+
+Please leave me comments and let me know if you have questions! 
+I also want to know what you guys want to see next! COMMENT & PM ME!
+If you need a tutorial for an Arduino sensor let me know and I will
+try to make a tutorial for it! 
+
+Shout out to Jeremy Blum! Great electrical Engineer! He is an Arduino Genius!
+Shout out to Jillian Illet! Also great guy that got me started!
+And also Shout out to PlyAlex that also has a tutorial better than this one!
+Thanks Guys for your consistant help to the Arduino Community!
+
+
