@@ -154,6 +154,18 @@ void dmpDataReady() {
 }
 
 
+#include <Servo.h>
+
+unsigned short int fl,fr,rl,rr;
+
+#define BaseValueFRONT   (short int)1101U
+#define BaseValueREAR    (short int)1100U
+unsigned char a,b;
+Servo FrontLeft,FrontRight,RearLeft,RearRight;
+
+
+
+
 
 // ================================================================
 // ===                      INITIAL SETUP                       ===
@@ -172,7 +184,7 @@ void setup() {
     // initialize serial communication
     // (115200 chosen because it is required for Teapot Demo output, but it's
     // really up to you depending on your project)
-    Serial.begin(115200);
+    Serial.begin(9600);
     while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
     // NOTE: 8MHz or slower host processors, like the Teensy @ 3.3v or Ardunio
@@ -235,6 +247,25 @@ void setup() {
 
     // configure LED for output
     pinMode(LED_PIN, OUTPUT);
+
+
+
+
+
+      // put your setup code here, to run once:
+  FrontLeft.attach(3);
+  FrontRight.attach(6);
+  RearLeft.attach(10);
+  RearRight.attach(11);
+
+  fl = BaseValueFRONT;
+  fr = BaseValueFRONT;
+  rl = BaseValueREAR;
+  rr = BaseValueREAR;
+
+
+
+    
 }
 
 
@@ -316,12 +347,7 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
-            Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
+
         #endif
 
         #ifdef OUTPUT_READABLE_REALACCEL
@@ -371,14 +397,117 @@ void loop() {
         // blink LED to indicate activity
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
+
+    }
+      a = Serial.read();
+  
+  if (a == 55)  // 7 is pressed
+  {
+    Serial.write("Front Left: ");
+    Serial.println(fl,10);
+    fl += 1;
+  }
+  else if(a == 57)  // 9 is pressed
+  {
+    Serial.write("Front Right: ");
+    Serial.println(fr,10);
+    fr +=  1;
+  }
+  else if(a == 49)  // 1 is pressed
+  {
+    Serial.write("Rear Left: ");
+    Serial.println(rl,10);
+    rl += 1;
+  }
+  else if(a == 52)
+  {
+    Serial.write("ALL Where Upped: ");
+    Serial.println(rr,10);
+
+    fl+=1;
+    fr+=1;
+    rl+=1;
+    rr+=1;
+  }
+  else if(a == 54)  // 6 is pressed
+  {
+    Serial.write("ALL Where Downed: ");
+    Serial.println(rr,10);
+
+    
+    fl-=1;
+    fr-=1;
+    rl-=1;
+    rr-=1;
+  }
+  else if(a == 51)  // 3 is pressed
+  {
+    Serial.write("Rear Right: ");
+    Serial.println(rr,10);
+    rr += 1;
+  }
+  else if(a == 53)  // 5 is pressed
+  {
+    Serial.write("STOP\n");
+        while(fl > BaseValueFRONT){ 
+      fl--;
     }
 
-    if((ypr[2] * 180/M_PI) >= 0.7)
-    {
-      Serial.write("UP \n");
+    
+        while(fr > BaseValueFRONT){
+      fr--;
     }
-    else if((ypr[2] * 180/M_PI) <= - 0.7)
-    {
-      Serial.write("DONW \n");
+
+    
+     while(rl > BaseValueREAR){
+      rl--;
     }
+  
+    
+       while(rr > BaseValueREAR){
+      rr--;
+    }
+
+ 
+  delay(100);
+  }
+  else if(a == 48)  //0 is pressed
+  {
+    if((ypr[1] * 180/M_PI) >= 2)
+    {
+          Serial.write("Front Right: Gyro");
+          Serial.println(fr,10);
+          fr += 1;
+
+
+                      Serial.print("ypr\t");
+            Serial.print(ypr[0] * 180/M_PI);
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);
+    }
+    else if((ypr[1] * 180/M_PI) <= -2)
+    {
+         Serial.write("Rear Right Gyro: ");
+          Serial.println(fr,10);
+          rr += 1;
+
+
+
+                      Serial.print("ypr\t");
+            Serial.print(ypr[0] * 180/M_PI);
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);
+    }
+
+
+  }
+  FrontLeft.writeMicroseconds(fl);
+  FrontRight.writeMicroseconds(fr);
+  RearLeft.writeMicroseconds(rl);
+  RearRight.writeMicroseconds(rr);
+
 }
