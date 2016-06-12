@@ -1,0 +1,4 @@
+Sensor readings with offsets:	-1	-3	16377	0	-1	-1
+Your offsets:	-2466	-439	1255	128	49	33
+
+Data is printed as: acelX acelY acelZ giroX giroY giroZ

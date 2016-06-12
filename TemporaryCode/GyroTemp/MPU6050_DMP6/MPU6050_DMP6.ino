@@ -207,7 +207,7 @@ void setup() {
 
     // load and configure the DMP
     Serial.println(F("Initializing DMP..."));
-    devStatus = mpu.dmpInitialize();
+    //devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
     mpu.setXGyroOffset(220);

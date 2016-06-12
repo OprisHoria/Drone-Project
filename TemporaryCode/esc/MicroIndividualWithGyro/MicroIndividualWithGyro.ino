@@ -1,45 +1,4 @@
-// I2C device class (I2Cdev) demonstration Arduino sketch for MPU6050 class using DMP (MotionApps v2.0)
-// 6/21/2012 by Jeff Rowberg <jeff@rowberg.net>
-// Updates should (hopefully) always be available at https://github.com/jrowberg/i2cdevlib
-//
-// Changelog:
-//      2013-05-08 - added seamless Fastwire support
-//                 - added note about gyro calibration
-//      2012-06-21 - added note about Arduino 1.0.1 + Leonardo compatibility error
-//      2012-06-20 - improved FIFO overflow handling and simplified read process
-//      2012-06-19 - completely rearranged DMP initialization code and simplification
-//      2012-06-13 - pull gyro and accel data from FIFO packet instead of reading directly
-//      2012-06-09 - fix broken FIFO read sequence and change interrupt detection to RISING
-//      2012-06-05 - add gravity-compensated initial reference frame acceleration output
-//                 - add 3D math helper file to DMP6 example sketch
-//                 - add Euler output and Yaw/Pitch/Roll output formats
-//      2012-06-04 - remove accel offset clearing for better results (thanks Sungon Lee)
-//      2012-06-01 - fixed gyro sensitivity to be 2000 deg/sec instead of 250
-//      2012-05-30 - basic DMP initialization working
 
-/* ============================================
-I2Cdev device library code is placed under the MIT license
-Copyright (c) 2012 Jeff Rowberg
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-===============================================
-*/
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
@@ -166,7 +125,8 @@ Servo FrontLeft,FrontRight,RearLeft,RearRight;
 
 
 
-
+unsigned char GyroReady;
+unsigned char maxRear, maxFront;
 // ================================================================
 // ===                      INITIAL SETUP                       ===
 // ================================================================
@@ -184,7 +144,7 @@ void setup() {
     // initialize serial communication
     // (115200 chosen because it is required for Teapot Demo output, but it's
     // really up to you depending on your project)
-    Serial.begin(9600);
+    Serial.begin(115200);
     while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
     // NOTE: 8MHz or slower host processors, like the Teensy @ 3.3v or Ardunio
@@ -213,10 +173,10 @@ void setup() {
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(220);
-    mpu.setYGyroOffset(76);
-    mpu.setZGyroOffset(-85);
-    mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
+    mpu.setXGyroOffset(128);  //220
+    mpu.setYGyroOffset(49);   //76
+    mpu.setZGyroOffset(33);    // -85
+    mpu.setZAccelOffset(1255); // 1788//1688 factory default for my test chip
 
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
@@ -265,6 +225,7 @@ void setup() {
 
 
 
+  GyroReady = 0;
     
 }
 
@@ -473,26 +434,33 @@ void loop() {
   }
   else if(a == 48)  //0 is pressed
   {
-    if((ypr[1] * 180/M_PI) >= 2)
-    {
-          Serial.write("Front Right: Gyro");
-          Serial.println(fr,10);
-          fr += 1;
-
-
-                      Serial.print("ypr\t");
+    GyroReady = 1;
+  }
+  else if (a == 97)   // A is pressed
+  {
             Serial.print(ypr[0] * 180/M_PI);
             Serial.print("\t");
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\t");
             Serial.println(ypr[2] * 180/M_PI);
-    }
-    else if((ypr[1] * 180/M_PI) <= -2)
+    if((ypr[1] * 180/M_PI) >= 0.2)
     {
-         Serial.write("Rear Right Gyro: ");
           Serial.println(fr,10);
+          fl -= 1;
           rr += 1;
 
+                      Serial.print("ypr\t");
+            Serial.print(ypr[0] * 180/M_PI);
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);
+    }
+    else if((ypr[1] * 180/M_PI) <= -0.2)
+    {
+          Serial.println(fr,10);
+          rr -= 1;
+          fl += 1;
 
 
                       Serial.print("ypr\t");
@@ -502,8 +470,20 @@ void loop() {
             Serial.print("\t");
             Serial.println(ypr[2] * 180/M_PI);
     }
-
-
+  }
+  if(GyroReady == 1)
+  {
+    if((ypr[1] * 180/M_PI) >= 0.2)
+    {
+          fl -= 1;
+          rr += 1;
+    }
+    else if((ypr[1] * 180/M_PI) <= -0.2)
+    {
+          rr -= 1;
+          fl += 1;
+    }
+    delay(1000);
   }
   FrontLeft.writeMicroseconds(fl);
   FrontRight.writeMicroseconds(fr);

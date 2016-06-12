@@ -1,0 +1,264 @@
+#include <Servo.h>
+
+#define DRONE_INC_DEC_STEP			(UINT8)	(1)
+#define DRONE__UC_MAX_DUTY_CYCLE	(UINT8) (255)
+#define DRONE_MIN_DUTY_CYCLE		(UINT8) (30)
+
+/*Configurable pins for motors. Use PWM pins 3,5,6,10,11*/
+#define DRONE_MOTOR_FL_PWM		3
+#define DRONE_MOTOR_FR_PWM		6
+#define DRONE_MOTOR_RL_PWM		10
+#define DRONE_MOTOR_RR_PWM		11
+
+#ifndef DRONE_MOTOR_RL_PWM 
+#error "Rear left motor configuration missing!"
+#endif
+#ifndef DRONE_MOTOR_FL_PWM 
+#error "Front left motor configuration missing!"
+#endif
+#ifndef DRONE_MOTOR_RR_PWM 
+#error "Rear right motor configuration missing!"
+#endif
+#ifndef DRONE_MOTOR_FR_PWM 
+#error "Front right motor configuration missing!"
+#endif
+
+#if (								\
+		(DRONE_MOTOR_RL_PWM == 3)	\
+		||							\
+		(DRONE_MOTOR_RL_PWM == 5)	\
+		||							\
+		(DRONE_MOTOR_RL_PWM == 6)	\
+		||							\
+		(DRONE_MOTOR_RL_PWM == 10)	\
+		||							\
+		(DRONE_MOTOR_RL_PWM == 11)	\
+	)								
+#else
+	#error "Rear left motor is configured on a pin that is not capable of PWM"
+#endif
+
+#if (								\
+		(DRONE_MOTOR_FL_PWM == 3)	\
+		||							\
+		(DRONE_MOTOR_FL_PWM == 5)	\
+		||							\
+		(DRONE_MOTOR_FL_PWM == 6)	\
+		||							\
+		(DRONE_MOTOR_FL_PWM == 10)	\
+		||							\
+		(DRONE_MOTOR_FL_PWM == 11)	\
+	)								
+#else
+#error "Front left motor is configured on a pin that is not capable of PWM"
+#endif
+
+#if (								\
+		(DRONE_MOTOR_RR_PWM == 3)	\
+		||							\
+		(DRONE_MOTOR_RR_PWM == 5)	\
+		||							\
+		(DRONE_MOTOR_RR_PWM == 6)	\
+		||							\
+		(DRONE_MOTOR_RR_PWM == 10)	\
+		||							\
+		(DRONE_MOTOR_RR_PWM == 11)	\
+	)								
+#else
+#error "Rear right motor is configured on a pin that is not capable of PWM"
+#endif
+
+#if (								\
+		(DRONE_MOTOR_FR_PWM == 3)	\
+		||							\
+		(DRONE_MOTOR_FR_PWM == 5)	\
+		||							\
+		(DRONE_MOTOR_FR_PWM == 6)	\
+		||							\
+		(DRONE_MOTOR_FR_PWM == 10)	\
+		||							\
+		(DRONE_MOTOR_FR_PWM == 11)	\
+	)								
+#else
+#error "Front right motor is configured on a pin that is not capable of PWM"
+#endif
+
+
+/* Data type declaration */
+
+typedef unsigned char UINT8;
+/* GLOBAL VARIABLES DECLARATION */
+
+static UINT8 SerialVariable;
+static UINT8 F_LFT_ModuleDutyCycle;
+static UINT8 F_RGT_ModuleDutyCycle;
+static UINT8 R_LFT_ModuleDutyCycle;
+static UINT8 R_RGT_ModuleDutyCycle;
+
+/*	MOTOR ENGINE OBJECTS */
+
+Servo	F_LFT_MOTOR,
+		F_RGT_MOTOR,
+		R_LFT_MOTOR,
+		R_RGT_MOTOR;
+
+
+void setup()
+{
+  /* add setup code here */
+	Pwm_Init();
+	Serial.begin(9600);
+}
+
+void loop()
+{
+
+  /* add main program code here */
+	Pwm_handler();
+	Bluetooth_manual_control();
+}
+
+void Pwm_Init(void)
+{
+	/* Default value of variables that contain PWM value */
+	F_LFT_ModuleDutyCycle = DRONE_MIN_DUTY_CYCLE;
+	F_RGT_ModuleDutyCycle = DRONE_MIN_DUTY_CYCLE;
+	R_LFT_ModuleDutyCycle = DRONE_MIN_DUTY_CYCLE;
+	R_RGT_ModuleDutyCycle = DRONE_MIN_DUTY_CYCLE;
+
+
+	/* Initializing motors on PWM pins */
+	F_LFT_MOTOR.attach(DRONE_MOTOR_FL_PWM);
+	F_RGT_MOTOR.attach(DRONE_MOTOR_FR_PWM);
+	R_LFT_MOTOR.attach(DRONE_MOTOR_RL_PWM);
+	R_RGT_MOTOR.attach(DRONE_MOTOR_RR_PWM);
+}
+
+void Pwm_handler(void)
+{
+	/* Setting motor duty cycle */
+	F_LFT_MOTOR.write(F_LFT_ModuleDutyCycle);
+	F_RGT_MOTOR.write(F_RGT_ModuleDutyCycle);
+	R_LFT_MOTOR.write(R_LFT_ModuleDutyCycle);
+	R_RGT_MOTOR.write(R_RGT_ModuleDutyCycle);
+}
+typedef enum {											 
+	enDWN = 49,	/* 1 				7---8---x		up---|-STP				*/
+	enBCK = 50,	/* 2				4---x---6		<----x--->				*/
+	enLFT = 52,	/* 4				1---2---x		dn---|---x				*/	
+	enRGT = 54,	/* 6	the above picture is how the drone is controlled	*/
+	enUPP = 55,	/* 7														*/ 
+	enFNT = 56,	/* 8														*/
+	enSTP = 57	/* 9														*/
+	
+}enumDroneController;
+void Bluetooth_manual_control(void)
+{
+	SerialVariable = Serial.read();
+
+
+	switch (SerialVariable)
+	{
+		case enUPP:
+		{
+			if (
+				F_LFT_ModuleDutyCycle > (DRONE__UC_MAX_DUTY_CYCLE - DRONE_INC_DEC_STEP)
+				||
+				F_RGT_ModuleDutyCycle > (DRONE__UC_MAX_DUTY_CYCLE - DRONE_INC_DEC_STEP)
+				||
+				R_LFT_ModuleDutyCycle > (DRONE__UC_MAX_DUTY_CYCLE - DRONE_INC_DEC_STEP)
+				||
+				R_RGT_ModuleDutyCycle > (DRONE__UC_MAX_DUTY_CYCLE - DRONE_INC_DEC_STEP)
+				)
+			{
+				Serial.write("Already Maximum!\n");
+			}
+			else
+			{
+				F_LFT_ModuleDutyCycle += DRONE_INC_DEC_STEP;
+				F_RGT_ModuleDutyCycle += DRONE_INC_DEC_STEP;
+				R_LFT_ModuleDutyCycle += DRONE_INC_DEC_STEP;
+				R_RGT_ModuleDutyCycle += DRONE_INC_DEC_STEP;
+			}
+		}break;
+
+		case enDWN:
+		{
+			if (
+				F_LFT_ModuleDutyCycle < (DRONE_MIN_DUTY_CYCLE + DRONE_INC_DEC_STEP)
+				||
+				F_RGT_ModuleDutyCycle < (DRONE_MIN_DUTY_CYCLE + DRONE_INC_DEC_STEP)
+				||
+				R_LFT_ModuleDutyCycle < (DRONE_MIN_DUTY_CYCLE + DRONE_INC_DEC_STEP)
+				||
+				R_RGT_ModuleDutyCycle < (DRONE_MIN_DUTY_CYCLE + DRONE_INC_DEC_STEP)
+				)
+			{
+				Serial.write("Already Minimum!\n");
+			}
+			else
+			{
+				F_LFT_ModuleDutyCycle -= DRONE_INC_DEC_STEP;
+				F_RGT_ModuleDutyCycle -= DRONE_INC_DEC_STEP;
+				R_LFT_ModuleDutyCycle -= DRONE_INC_DEC_STEP;
+				R_RGT_ModuleDutyCycle -= DRONE_INC_DEC_STEP;
+			}
+		}break;
+
+		case enLFT:
+		{
+			BT_LeftCommand();
+		}break;
+
+		case enRGT:
+		{
+			BT_RightCommand();
+		}break;
+
+		case enFNT:
+		{
+
+		}break;
+
+		case enBCK:
+		{
+
+		}break;
+
+		default:
+		{
+			/* Do nothing in default */
+		}break;
+	}
+
+}
+
+void GYRO_Control(void)
+{
+
+}
+
+void Bt_UpCommand(void)
+{
+
+}
+
+void Bt_DownCommand(void)
+{
+
+}
+
+void BT_LeftCommand(void)
+{
+	F_LFT_MOTOR.write(F_LFT_ModuleDutyCycle - DRONE_INC_DEC_STEP);
+	R_LFT_MOTOR.write(R_LFT_ModuleDutyCycle - DRONE_INC_DEC_STEP);
+	delay(1000);
+}
+
+void BT_RightCommand(void)
+{
+	F_RGT_MOTOR.write(F_RGT_ModuleDutyCycle - DRONE_INC_DEC_STEP);
+	R_RGT_MOTOR.write(R_RGT_ModuleDutyCycle - DRONE_INC_DEC_STEP);
+	delay(1000);
+}
+
