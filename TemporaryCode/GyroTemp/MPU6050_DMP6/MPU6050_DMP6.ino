@@ -231,7 +231,7 @@ void setup() {
         dmpReady = true;
 
         // get expected DMP packet size for later comparison
-        packetSize = mpu.dmpGetFIFOPacketSize();
+///        packetSize = mpu.dmpGetFIFOPacketSize();
     } else {
         // ERROR!
         // 1 = initial memory load failed

@@ -323,7 +323,7 @@ void loop() {
             Serial.print("\t");
             Serial.println(ypr[2] * 180/M_PI);
         #endif
-
+/*
         #ifdef OUTPUT_READABLE_REALACCEL
             // display real acceleration, adjusted to remove gravity
             mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -367,7 +367,7 @@ void loop() {
             Serial.write(teapotPacket, 14);
             teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
         #endif
-
+*/
         // blink LED to indicate activity
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);

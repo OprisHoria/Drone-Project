@@ -1,103 +1,99 @@
-#include <Servo.h>
-unsigned char fl,fr,rl,rr;
-unsigned char a,b;
-Servo FrontLeft,FrontRight,RearLeft,RearRight;
+/*All Quadcopter code under*/
 
-void setup() {
-  // put your setup code here, to run once:
-  FrontLeft.attach(3);
-  FrontRight.attach(6);
-  RearLeft.attach(10);
-  RearRight.attach(11);
 
-  fl = 30;
-  fr = 30;
-  rl = 30;
-  rr = 30;
+/* Data types clarifier */
+typedef unsigned char u8;
+typedef unsigned short int u16;
+typedef unsigned long int u32;
 
-    Serial.begin(9600);
+#define FALSE 0
+#define TRUE !False
+
+/* Enum type for state machine */
+typedef enum{
+  State_PowerSaving,
+  State_TemperatureMeasurement,
+  State_ManualDroneControl,
+  State_AutomaticDroneTakeOff
+}EnStates;
+
+static EnStates En_StateMachineGlobal;
+
+#define BAUD_RATE 115200
+
+/* Function prototypes */
+void GetBluetoothCommand(void);
+
+
+/* Variable initializer */
+void setup(void)
+{
+  Serial.begin(BAUD_RATE);          /* Start UART communication */
+  En_StateMachineGlobal = State_PowerSaving;  
 }
 
-void loop() {
+/* All operation is done here. */
+void loop(void)
+{
 
-  a = Serial.read();
+  /* State Machine here */
+  switch(En_StateMachineGlobal)
+  {
+    case State_PowerSaving:
+    { 
+      GetBluetoothCommand();
+    }
+    break;
+    
+    case State_TemperatureMeasurement:
+    { 
+    }
+    break;
+    
+    case State_ManualDroneControl:
+    { 
+      ManualDroneControl();
+    }
+    break;
+    
+    case State_AutomaticDroneTakeOff:
+    { 
+    }
+    break;
+  }
+}
+
+#define BLT_ZERO 48
+#define BLT_ONE  49
+#define BLT_TWO  50
+
+void GetBluetoothCommand(void)
+{
+  u8 U8_BluetoothMessage; 
+  U8_BluetoothMessage = Serial.read();
   
-  if (a == 55)  // 7 is pressed
+  if( U8_BluetoothMessage == BLT_ZERO )
   {
-    Serial.write("Front Left: ");
-    Serial.println(fl,10);
-    fl += 1;
+    En_StateMachineGlobal = State_TemperatureMeasurement;
   }
-  else if(a == 57)  // 9 is pressed
+  else if( U8_BluetoothMessage == BLT_ONE )
   {
-    Serial.write("Front Right: ");
-    Serial.println(fr,10);
-    fr += 1;
+    En_StateMachineGlobal = State_ManualDroneControl;
+    Serial.write("Manual State");
   }
-  else if(a == 49)  // 1 is pressed
-  {
-    Serial.write("Rear Left: ");
-    Serial.println(rl,10);
-    rl += 1;
-  }
-  else if(a == 52)
-  {
-    Serial.write("ALL Where Upped: ");
-    Serial.println(rr,10);
+}
 
-    fl+=1;
-    fr+=1;
-    rl+=1;
-    rr+=1;
-  }
-  else if(a == 54)  // 6 is pressed
-  {
-    Serial.write("ALL Where Downed: ");
-    Serial.println(rr,10);
-
-    
-    fl-=1;
-    fr-=1;
-    rl-=1;
-    rr-=1;
-  }
-  else if(a == 51)  // 3 is pressed
-  {
-    Serial.write("Rear Right: ");
-    Serial.println(rr,10);
-    rr += 1;
-  }
-  else if(a == 53)  // 5 is pressed
-  {
-    Serial.write("STOP\n");
-        while(fl > 30){
-      fl--;
-    }
-
-    
-        while(fr > 30){
-      fr--;
-    }
-
-    
-     while(rl > 30){
-      rl--;
-    }
+void ManualDroneControl(void)
+{
+  u8 U8_BluetoothMessage; 
+  U8_BluetoothMessage = Serial.read();
   
-    
-       while(rr > 30){
-      rr--;
-    }
-
-  
-  delay(100);
+  if(U8_BluetoothMessage == BLT_ZERO)
+  {
+    Serial.write("Up 1");
   }
-
-  FrontLeft.write(fl);
-  FrontRight.write(fr);
-  RearLeft.write(rl);
-  RearRight.write(rr);
-
+    
+  
 }
 
 
