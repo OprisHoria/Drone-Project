@@ -198,57 +198,63 @@ void loop(void)
 
 void StateMachine(void)
 {
-  switch(En_StateMachineGlobal)
+  switch(En_StateMachineGlobal)			/* State machine state is decided by bluetooth transmission */
   {
-    case State_PowerSaving:
+    case State_PowerSaving:				/* Go to power saving state */
     { 
-
-    }
-    break;
-    
-    case State_TemperatureMeasurement:
+		PowerSaving();
+    }break;    
+    case State_TemperatureMeasurement:	/* Go to measure temperature state */
     { 
-    }
-    break;
-    
-    case State_ManualDroneControl:
+		MeasureTemperature();
+    }break;
+    case State_ManualDroneControl:		/* Go to manual quadcopter control */
     { 
-      ManualDroneControl();
-    }
-    break;
-    
-    case State_AutomaticDroneTakeOff:
+		ManualDroneControl();
+    }break;
+    case State_AutomaticDroneTakeOff:	/* Go to automatic quadcopter take-off */
     { 
-    }
-	
-	case State_AutomaticDroneLand:
+		AutoTakeOff();
+    }break;
+	case State_AutomaticDroneLand:		/* Go to automatic quadcopter land */
 	{
-		
-	}
-	
-    break;
+		AutoLand();
+	}break;
   }
-  
-  
+  UpdateMotorSpeed();					/* Write motor speed value */
+}
+
+void UpdateMotorSpeed(void);
+{
   FrontLeft.writeMicroseconds(fl);
   FrontRight.writeMicroseconds(fr);
   RearLeft.writeMicroseconds(rl);
-  RearRight.writeMicroseconds(rr);
-  
+  RearRight.writeMicroseconds(rr);	
 }
 void GetBluetoothCommand(void)
 {
-  u8 U8_BluetoothMessage; 
-  U8_BluetoothMessage = Serial.read();
+  auto u8 U8_BluetoothMessage; 			/* Automatic variable declaration that will store received blt value */	
+  U8_BluetoothMessage = Serial.read();	/* Get bluetooth transmission value */
   
-  if( U8_BluetoothMessage == BLT_ZERO )
+  if( U8_BluetoothMessage == BLT_ZERO )	
   {
     En_StateMachineGlobal = State_TemperatureMeasurement;
+	Serial.write("Temperature reading state");
   }
   else if( U8_BluetoothMessage == BLT_ONE )
   {
     En_StateMachineGlobal = State_ManualDroneControl;
-    Serial.write("Manual State");
+    Serial.write("Manual control state");
+  }
+  else if( U8_BluetoothMessage == BLT_TWO )
+  {
+	En_StateMachineGlobal = State_AutomaticDroneTakeOff;
+    Serial.write("Automatic take off state");
+  }
+  else if( U8_BluetoothMessage == BLT_THREE )
+  {
+	En_StateMachineGlobal = State_AutomaticDroneLand;
+    Serial.write("Automatic landing state");  
   }
 }
 
@@ -331,7 +337,6 @@ void GyroInit(void)
     Serial.println(F("Initializing Gyroscope"));
     devStatus = mpu.dmpInitialize();								/* Initializing gyroscope */
 
-
     mpu.setXGyroOffset(GYRO_X_OFFSET);	/* Gyroscope offset that calibrator decided for X axis */ 
     mpu.setYGyroOffset(GYRO_Y_OFFSET);	/* Gyroscope offset that calibrator decided for Y axis */ 
     mpu.setZGyroOffset(GYRO_Z_OFFSET);	/* Gyroscope offset that calibrator decided for Z axis */ 
@@ -394,41 +399,63 @@ void GyroRun(void)
     }
 }
 
-void calculatePid(void)
+void CalculatePid(void)
 {
-  //Roll calculations
-  pid_error_temp = gyro_roll_input - pid_roll_setpoint;
-  pid_i_mem_roll += pid_i_gain_roll * pid_error_temp;
-  if(pid_i_mem_roll > pid_max_roll)pid_i_mem_roll = pid_max_roll;
-  else if(pid_i_mem_roll < pid_max_roll * -1)pid_i_mem_roll = pid_max_roll * -1;
+	/* Roll calculations */
+	pid_error_temp  = (gyro_roll_input - pid_roll_setpoint);
+	pid_i_mem_roll += (pid_i_gain_roll * pid_error_temp);
+
+	if(pid_i_mem_roll > pid_max_roll)
+	{
+		pid_i_mem_roll = pid_max_roll;
+	}
+	else if(pid_i_mem_roll < pid_max_roll * -1)
+	{  
+		pid_i_mem_roll = pid_max_roll * -1;
+	}
   
-  pid_output_roll = pid_p_gain_roll * pid_error_temp + pid_i_mem_roll + pid_d_gain_roll * (pid_error_temp - pid_last_roll_d_error);
-  if(pid_output_roll > pid_max_roll)pid_output_roll = pid_max_roll;
-  else if(pid_output_roll < pid_max_roll * -1)pid_output_roll = pid_max_roll * -1;
+	pid_output_roll = ((pid_p_gain_roll * pid_error_temp)   \
+						+ pid_i_mem_roll + pid_d_gain_roll) \
+						* (pid_error_temp - pid_last_roll_d_error);
+	
+	if(pid_output_roll > pid_max_roll)
+	{
+		pid_output_roll = pid_max_roll;
+	}
+	else if(pid_output_roll < pid_max_roll * -1)
+	{
+		pid_output_roll = pid_max_roll * -1;
+	}
+	
+	pid_last_roll_d_error = pid_error_temp;
   
-  pid_last_roll_d_error = pid_error_temp;
-  
-  //Pitch calculations
-  pid_error_temp = gyro_pitch_input - pid_pitch_setpoint;
-  pid_i_mem_pitch += pid_i_gain_pitch * pid_error_temp;
-  if(pid_i_mem_pitch > pid_max_pitch)pid_i_mem_pitch = pid_max_pitch;
-  else if(pid_i_mem_pitch < pid_max_pitch * -1)pid_i_mem_pitch = pid_max_pitch * -1;
-  
-  pid_output_pitch = pid_p_gain_pitch * pid_error_temp + pid_i_mem_pitch + pid_d_gain_pitch * (pid_error_temp - pid_last_pitch_d_error);
-  if(pid_output_pitch > pid_max_pitch)pid_output_pitch = pid_max_pitch;
-  else if(pid_output_pitch < pid_max_pitch * -1)pid_output_pitch = pid_max_pitch * -1;
-    
-  pid_last_pitch_d_error = pid_error_temp;
-    
-  //Yaw calculations
-  pid_error_temp = gyro_yaw_input - pid_yaw_setpoint;
-  pid_i_mem_yaw += pid_i_gain_yaw * pid_error_temp;
-  if(pid_i_mem_yaw > pid_max_yaw)pid_i_mem_yaw = pid_max_yaw;
-  else if(pid_i_mem_yaw < pid_max_yaw * -1)pid_i_mem_yaw = pid_max_yaw * -1;
-  
-  pid_output_yaw = pid_p_gain_yaw * pid_error_temp + pid_i_mem_yaw + pid_d_gain_yaw * (pid_error_temp - pid_last_yaw_d_error);
-  if(pid_output_yaw > pid_max_yaw)pid_output_yaw = pid_max_yaw;
-  else if(pid_output_yaw < pid_max_yaw * -1)pid_output_yaw = pid_max_yaw * -1;
-    
-  pid_last_yaw_d_error = pid_error_temp;
+	/* Pitch calculations */
+	pid_error_temp   = gyro_pitch_input - pid_pitch_setpoint;
+	pid_i_mem_pitch += pid_i_gain_pitch * pid_error_temp;
+	
+	if(pid_i_mem_pitch > pid_max_pitch)
+	{
+		pid_i_mem_pitch = pid_max_pitch;
+	}
+	else if(pid_i_mem_pitch < pid_max_pitch * -1)
+	{
+		pid_i_mem_pitch = pid_max_pitch * -1;
+	}
+	pid_output_pitch = pid_p_gain_pitch * pid_error_temp + pid_i_mem_pitch + pid_d_gain_pitch * (pid_error_temp - pid_last_pitch_d_error);
+	if(pid_output_pitch > pid_max_pitch)pid_output_pitch = pid_max_pitch;
+	else if(pid_output_pitch < pid_max_pitch * -1)pid_output_pitch = pid_max_pitch * -1;
+
+	pid_last_pitch_d_error = pid_error_temp;
+
+	//Yaw calculations
+	pid_error_temp = gyro_yaw_input - pid_yaw_setpoint;
+	pid_i_mem_yaw += pid_i_gain_yaw * pid_error_temp;
+	if(pid_i_mem_yaw > pid_max_yaw)pid_i_mem_yaw = pid_max_yaw;
+	else if(pid_i_mem_yaw < pid_max_yaw * -1)pid_i_mem_yaw = pid_max_yaw * -1;
+
+	pid_output_yaw = pid_p_gain_yaw * pid_error_temp + pid_i_mem_yaw + pid_d_gain_yaw * (pid_error_temp - pid_last_yaw_d_error);
+	if(pid_output_yaw > pid_max_yaw)pid_output_yaw = pid_max_yaw;
+	else if(pid_output_yaw < pid_max_yaw * -1)pid_output_yaw = pid_max_yaw * -1;
+
+	pid_last_yaw_d_error = pid_error_temp;
 }
