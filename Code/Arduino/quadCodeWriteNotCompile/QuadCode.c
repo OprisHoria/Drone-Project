@@ -29,6 +29,9 @@
 
 #define OUTPUT_READABLE_YAWPITCHROLL
 
+#define ROLL	2
+#define PITCH	1
+#define YAW		0
 /* Data types clarifier */
 typedef unsigned char u8;
 typedef unsigned short int u16;

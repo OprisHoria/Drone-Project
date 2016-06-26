@@ -126,9 +126,9 @@ float pid_i_mem_roll, pid_roll_setpoint, gyro_roll_input, pid_output_roll, pid_l
 float pid_i_mem_pitch, pid_pitch_setpoint, gyro_pitch_input, pid_output_pitch, pid_last_pitch_d_error;
 float pid_i_mem_yaw, pid_yaw_setpoint, gyro_yaw_input, pid_output_yaw, pid_last_yaw_d_error;
 
-float pid_p_gain_roll = 0;
-float pid_i_gain_roll = 25;
-float pid_d_gain_roll = 0;
+float pid_p_gain_roll = 100;
+float pid_i_gain_roll = 40;
+float pid_d_gain_roll = 30;
 int   pid_max_roll    = 400;
 
 float pid_p_gain_pitch = pid_p_gain_roll;  //Gain setting for the pitch P-controller.
@@ -335,9 +335,9 @@ void GyroInit(void)
 
     // supply your own gyro offsets here, scaled for min sensitivity
     mpu.setXGyroOffset(134);  //220
-    mpu.setYGyroOffset(49);   //76
-    mpu.setZGyroOffset(33);    // -85
-    mpu.setZAccelOffset(1236); // 1788//1688 factory default for my test chip
+    mpu.setYGyroOffset(45);   //76
+    mpu.setZGyroOffset(35);    // -85
+    mpu.setZAccelOffset(1258); // 1788//1688 factory default for my test chip
 
   
   // make sure it worked (returns 0 if so)

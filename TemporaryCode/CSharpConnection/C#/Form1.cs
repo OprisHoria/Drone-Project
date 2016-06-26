@@ -16,7 +16,7 @@ namespace WindowsFormsApplication2
             InitializeComponent();
             serialPort1.PortName = "COM3";
             serialPort1.BaudRate = 9600;
-            serialPort1.Open();
+           // serialPort1.Open();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -99,6 +99,11 @@ namespace WindowsFormsApplication2
         {
             serialPort1.Write("53");
             Console.WriteLine("STOP");
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
