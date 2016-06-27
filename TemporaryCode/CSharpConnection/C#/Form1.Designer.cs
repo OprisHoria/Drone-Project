@@ -53,7 +53,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(362, 63);
+            this.button1.Location = new System.Drawing.Point(384, 46);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(206, 38);
             this.button1.TabIndex = 4;
@@ -139,15 +139,16 @@
             // 
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(67, 4);
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(596, 62);
+            this.richTextBox1.Location = new System.Drawing.Point(596, 32);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(100, 39);
+            this.richTextBox1.Size = new System.Drawing.Size(176, 69);
             this.richTextBox1.TabIndex = 12;
             this.richTextBox1.Text = "";
+            this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
             // 
             // button2
             // 
@@ -157,6 +158,7 @@
             this.button2.TabIndex = 13;
             this.button2.Text = "Increase Speed";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click_1);
             // 
             // button3
             // 
@@ -176,6 +178,7 @@
             this.button10.TabIndex = 15;
             this.button10.Text = "Auto Land";
             this.button10.UseVisualStyleBackColor = true;
+            this.button10.Click += new System.EventHandler(this.button10_Click);
             // 
             // richTextBox2
             // 
@@ -184,6 +187,7 @@
             this.richTextBox2.Size = new System.Drawing.Size(602, 133);
             this.richTextBox2.TabIndex = 16;
             this.richTextBox2.Text = "";
+            this.richTextBox2.TextChanged += new System.EventHandler(this.richTextBox2_TextChanged);
             // 
             // label1
             // 

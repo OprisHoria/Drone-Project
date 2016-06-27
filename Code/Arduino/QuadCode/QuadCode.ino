@@ -126,8 +126,8 @@ float pid_i_mem_roll, pid_roll_setpoint, gyro_roll_input, pid_output_roll, pid_l
 float pid_i_mem_pitch, pid_pitch_setpoint, gyro_pitch_input, pid_output_pitch, pid_last_pitch_d_error;
 float pid_i_mem_yaw, pid_yaw_setpoint, gyro_yaw_input, pid_output_yaw, pid_last_yaw_d_error;
 
-float pid_p_gain_roll = 100;
-float pid_i_gain_roll = 40;
+float pid_p_gain_roll = 4;
+float pid_i_gain_roll = 25;
 float pid_d_gain_roll = 30;
 int   pid_max_roll    = 400;
 
@@ -224,11 +224,11 @@ void loop(void)
       calculatePid();
       
       
-      fr = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw;
+     fr=1100;// fr = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw;
       rr = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw;
-      rl = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw;
+      rl=1100;//rl = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw;
       fl = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw;
-
+/*
       Serial.print("Front left: ");
       Serial.print(fl);
       Serial.print("\t");
@@ -246,7 +246,7 @@ void loop(void)
 
       Serial.println();
     
-      delay(10);
+     // delay(10);*/
     }
     break;
     
@@ -269,8 +269,10 @@ void loop(void)
   
   
   FrontLeft.writeMicroseconds(fl);
+
   FrontRight.writeMicroseconds(fr);
   RearLeft.writeMicroseconds(rl);
+  
   RearRight.writeMicroseconds(rr);
   
 }
@@ -334,10 +336,10 @@ void GyroInit(void)
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(134);  //220
-    mpu.setYGyroOffset(45);   //76
-    mpu.setZGyroOffset(35);    // -85
-    mpu.setZAccelOffset(1258); // 1788//1688 factory default for my test chip
+    mpu.setXGyroOffset(139);  //220
+    mpu.setYGyroOffset(44);   //76
+    mpu.setZGyroOffset(34);    // -85
+    mpu.setZAccelOffset(1252); // 1788//1688 factory default for my test chip
 
   
   // make sure it worked (returns 0 if so)
